@@ -143,7 +143,7 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
       lureXValue + lureSize.width <= catchZone.x + catchZone.width
     ) {
       setChances(difficulty.chances);
-      if (catchZonesLeft === 0) {
+      if (catchZonesLeft === 0 && difficulty.name !== FISH_DIFFICULTY.EASY.name) {
         caughtFishCB();
       } else {
         setCatchZonesLeft((prevState) => prevState - 1);
