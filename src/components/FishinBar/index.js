@@ -1,37 +1,33 @@
 import { useEffect, useState, useRef } from "react";
-import {
-  Text,
-  View,
-  Animated,
-  Easing,
-  TouchableOpacity,
-} from "react-native";
+import { Text, View, Animated, Easing, Pressable } from "react-native";
 import { randInt, useComponentSize } from "../../utils/index";
 
 const FISH_DIFFICULTY = {
-  LEGENDARY: { modifier: 5, name: "Legendary" },
-  EXTREME: { modifier: 4, name: "Extreme" },
-  HARD: { modifier: 3, name: "Hard" },
-  MEDIUM: { modifier: 2, name: "Medium" },
-  EASY: { modifier: 1, name: "Easy" },
+  LEGENDARY: { modifier: 5, name: "Legendary", chances: 2 },
+  EXTREME: { modifier: 4, name: "Extreme", chances: 2 },
+  HARD: { modifier: 3, name: "Hard", chances: 3 },
+  MEDIUM: { modifier: 2, name: "Medium", chances: 4 },
+  EASY: { modifier: 1, name: "Easy", chances: 5 },
 };
 
-const FishinBar = ({ fishin, caughtFishCB }) => {
-  if (!fishin) {
-    return null;
-  }
+const AnimatedPressable = new Animated.createAnimatedComponent(Pressable);
 
-  const [catchZoneWidth, setCatchZoneWidth] = useState(0);
-  const [bars, setBars] = useState(1);
-  const [catchZoneX, setCatchZoneX] = useState(0);
+const FishinBar = ({ caughtFishCB, lostFishCB }) => {
+  const [catchZonesLeft, setCatchZonesLeft] = useState(undefined);
+  const [catchZone, setCatchZone] = useState({ width: 0, x: 0 });
   const [difficulty, setDifficulty] = useState(undefined);
+  // Boolean, the line that has hit the catch zone to "catch" the fish
   const [lureCast, setLureCast] = useState(false);
-  const [fishStatus, setFishStatus] = useState('');
+  const [chances, setChances] = useState(0);
+
   const [fishinBarSize, onFishinBarLayout] = useComponentSize();
   const [catchZoneSize, onCatchZoneLayout] = useComponentSize();
   const [lureSize, onLureLayout] = useComponentSize();
-  const lureX = useRef(new Animated.Value(0)).current;
 
+  const lureX = useRef(new Animated.Value(0)).current;
+  const catchFlashOpac = useRef(new Animated.Value(0)).current;
+
+  // Initial setup for difficulty and lure
   useEffect(() => {
     lureX.addListener(() => {});
 
@@ -75,69 +71,108 @@ const FishinBar = ({ fishin, caughtFishCB }) => {
     }
 
     setDifficulty(difficulty);
+    setCatchZonesLeft(difficulty.modifier);
+    setChances(difficulty.chances);
 
     return () => lureX.removeAllListeners();
   }, []);
 
-  // Catch zone setup, after
+  // Catch zone setup, after difficulty is calculated
   useEffect(() => {
-    if (!!difficulty && !!fishinBarSize) {
+    if (!!difficulty && !!fishinBarSize && catchZonesLeft) {
       const czWidth = 100 / difficulty.modifier + 5;
-      setCatchZoneWidth(czWidth);
-
       let czX = randInt(0, fishinBarSize.width - czWidth);
-      setCatchZoneX(czX);
-    }
-  }, [difficulty, fishinBarSize]);
 
-  useEffect(() => {
-    if (!!catchZoneWidth && !!catchZoneSize && !!lureSize && !lureCast) {
-      setLureCast(true);
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(lureX, {
-            duration: 2500,
-            toValue: fishinBarSize.width - lureSize.width,
-            easing: Easing.linear,
-            useNativeDriver: true,
-          }),
-          Animated.timing(lureX, {
-            duration: 2500,
-            toValue: 0,
-            easing: Easing.linear,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
+      setCatchZone({ x: czX, width: czWidth });
     }
-  }, [catchZoneWidth, catchZoneSize, lureSize]);
+  }, [difficulty, fishinBarSize, catchZonesLeft]);
+
+  // Lure animation setup, after catchzone setup
+  useEffect(() => {
+    if (!!catchZoneSize && !!lureSize && !!fishinBarSize && !lureCast) {
+      setLureCast(true);
+      startLure();
+    }
+  }, [catchZoneSize, lureSize, lureCast]);
+
+  const startLure = () => {
+    Animated.timing(lureX, {
+      duration: 2500,
+      toValue: fishinBarSize.width - lureSize.width,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    }).start(() => {
+      setChances((prevState) => (prevState < 2 ? lostFishCB() : prevState - 1));
+
+      Animated.timing(lureX, {
+        duration: 2500,
+        toValue: 0,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }).start(() => {
+        setChances((prevState) =>
+          prevState < 2 ? lostFishCB() : prevState - 1
+        );
+        startLure();
+      });
+    });
+  };
 
   const attemptCatch = () => {
     const lureXValue = lureX.__getValue();
 
+    const easOutQuart = Easing.bezier(0.42, 0, 0.58, 1);
+
+    Animated.sequence([
+      Animated.timing(catchFlashOpac, {
+        toValue: 0.4,
+        duration: 100,
+        useNativeDriver: true,
+        easing: easOutQuart,
+      }),
+      Animated.timing(catchFlashOpac, {
+        toValue: 0,
+        duration: 100,
+        useNativeDriver: true,
+        easing: easOutQuart,
+      }),
+    ]).start();
+
     if (
-      lureXValue >= catchZoneX &&
-      lureXValue + lureSize.width <= catchZoneX + catchZoneWidth
+      lureXValue >= catchZone.x &&
+      lureXValue + lureSize.width <= catchZone.x + catchZone.width
     ) {
-      caughtFishCB();
-      setFishStatus("FSH CAUGHT!!!!");
+      setChances(difficulty.chances);
+      if (catchZonesLeft === 0) {
+        caughtFishCB();
+      } else {
+        setCatchZonesLeft((prevState) => prevState - 1);
+      }
     } else {
-      setFishStatus("FSH lost :(");
+      setChances((prevState) => (prevState < 2 ? lostFishCB() : prevState - 1));
     }
   };
 
   return (
     <>
-      <TouchableOpacity onPressIn={attemptCatch}>
-        <Text style={{ fontSize: 24, color: "red" }}>Catch!</Text>
-      </TouchableOpacity>
-      <Text style={{ fontSize: 24, color: "red" }}>{fishStatus}</Text>
+      <AnimatedPressable
+        style={{
+          position: "absolute",
+          height: "100%",
+          width: "100%",
+          backgroundColor: "white",
+          opacity: catchFlashOpac,
+          zIndex: 100,
+        }}
+        onPressIn={attemptCatch}
+      />
+      <Text style={{ fontSize: 24, color: "blue" }}>{chances}</Text>
       <View
         onLayout={onFishinBarLayout}
         style={{
           width: "90%",
           height: 50,
-          backgroundColor: "black",
+          backgroundColor: "cyan",
           position: "absolute",
           bottom: 50,
         }}
@@ -147,8 +182,8 @@ const FishinBar = ({ fishin, caughtFishCB }) => {
           style={{
             position: "absolute",
             height: "100%",
-            width: catchZoneWidth || 0,
-            left: catchZoneX,
+            width: catchZone.width || 0,
+            left: catchZone.x,
             backgroundColor: "yellow",
           }}
         />
@@ -163,7 +198,7 @@ const FishinBar = ({ fishin, caughtFishCB }) => {
           }}
         />
         {!!difficulty && (
-          <Text style={{ color: "cyan", fontSize: 25 }}>{difficulty.name}</Text>
+          <Text style={{ color: "red", fontSize: 25 }}>{difficulty.name}</Text>
         )}
       </View>
     </>

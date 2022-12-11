@@ -1,7 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import FishinBar from "./src/components/FishinBar";
+import RootStack from "./src/navigation/RootStack";
 
 /**
  * Ideas for the game:
@@ -20,40 +18,22 @@ import FishinBar from "./src/components/FishinBar";
  *    Lure bar will bounce back and forth less for every rarity higher
  *    Make time between fish random, with an item to make time shorter (hmm... maybe, anti gameplay?)
  *    Should lure bar have to be fully in catch zone, or partially? Leaning towards fully. Should it be smaller?
+ *    Make screen flash whenever user attempts to catch fish for every bar, and if they break the line, show a big ol "SNAP!!!"
+ *    Two drawers, shop on left side, fish-dex (pokedex) on right side
+ *    As the player catches more fish in a row (1-bounce combos, 0-bounce combos), the fish gains more weight, making it sell for more
+ *    Save previous fish in state, if they catch a new one they give it up
+ *
+ *    Shop:
+ *      Log book - very inexpensive item to unlock right-side drawer (pokedex)
+ *      "Sell current fish" button
+ *      Fishing rod, attachments and main rod
  */
 
 export default function App() {
-  const [fishin, setFishin] = useState(false);
-
-  const fishFound = () => {
-    setFishin(true);
-  };
-
-  useEffect(() => {
-    fishFound();
-
-    const int = setInterval(fishFound, 7000);
-
-    return () => clearInterval(int);
-  }, []);
-
-  const caughtFishCB = () => {
-    setFishin(false);
-  };
-
   return (
-    <View style={styles.container}>
+    <>
       <StatusBar style="auto" />
-      <FishinBar fishin={fishin} caughtFishCB={caughtFishCB} />
-    </View>
+      <RootStack />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
