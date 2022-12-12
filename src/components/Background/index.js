@@ -64,7 +64,7 @@ const Background = ({ gameStarted, setGameStarted }) => {
     Animated.parallel([
       Animated.timing(descendY, {
         duration: 3000,
-        toValue: -height * 2,
+        toValue: -height * 1.95,
         easing: easOutQuart,
         useNativeDriver: true,
       }),
@@ -106,6 +106,7 @@ const Background = ({ gameStarted, setGameStarted }) => {
           width: width * 1.4,
           height: height * 4,
           top: -height,
+          left: -150,
           zIndex: 0,
           transform: [{ translateY: descendY }],
         }}

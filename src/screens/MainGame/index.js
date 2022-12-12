@@ -1,16 +1,10 @@
 import { useEffect, useState, useRef } from "react";
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
-  Text,
-} from "react-native";
+import { View, TouchableOpacity, Animated, Dimensions } from "react-native";
 import Background from "../../components/Background";
 import FishinBar from "../../components/FishinBar";
 import { NavigableRoutes } from "../../navigation";
 import { randInt } from "../../utils";
+import styles from "./styles";
 
 const { width, height } = Dimensions.get("screen");
 
@@ -19,26 +13,19 @@ const MainGame = ({ navigation }) => {
   const [gameStarted, setGameStarted] = useState(false);
   const [lureCast, setLureCast] = useState(false);
   const [fishin, setFishin] = useState(false);
-  const [announcementText, setAnnouncementText] = useState("");
   const [dots, setDots] = useState([]);
 
   const castOpac = useRef(new Animated.Value(0)).current;
 
-  const fishFound = () => {
-    setFishin(true);
-  };
-
   const caughtFishCB = (fish) => {
     setFishin(false);
     setLureCast(false);
-    setAnnouncementText("You caught the fish! Gzzzz");
     // Add fish to inventory, fish-dex (If they have journal)
   };
 
   const lostFishCB = () => {
     setFishin(false);
     setLureCast(false);
-    setAnnouncementText("You lost the fish!");
   };
 
   useEffect(() => {
@@ -55,7 +42,8 @@ const MainGame = ({ navigation }) => {
     let int;
     let castingFeedback;
     if (lureCast && !fishin) {
-      int = setInterval(fishFound, randInt(5000, 7500));
+      // For testing, the fish is found immediately if right argument is 0
+      int = setInterval(() => setFishin(true), 0);
       castingFeedback = setInterval(() => {
         setDots((prevState) =>
           prevState.length < 3 ? [...prevState, ". "] : []
@@ -76,14 +64,6 @@ const MainGame = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Background gameStarted={gameStarted} setGameStarted={setGameStarted} />
-      <Text
-        style={{
-          fontSize: 24,
-          color: "gold",
-        }}
-      >
-        {announcementText}
-      </Text>
       <TouchableOpacity onPress={() => setLureCast(true)} disabled={lureCast}>
         <Animated.Text
           style={{
@@ -97,6 +77,38 @@ const MainGame = ({ navigation }) => {
           Cast{dots}
         </Animated.Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => navigation.navigate(NavigableRoutes.StoreDrawer)}
+        disabled={lureCast}
+      >
+        <Animated.Text
+          style={{
+            fontSize: 24,
+            color: "gold",
+            opacity: castOpac,
+            right: width * 0.29,
+            top: height * 0.05,
+          }}
+        >
+          Store
+        </Animated.Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => navigation.navigate(NavigableRoutes.StatsDrawer)}
+        disabled={lureCast}
+      >
+        <Animated.Text
+          style={{
+            fontSize: 24,
+            color: "gold",
+            opacity: castOpac,
+            right: width * 0.29,
+            top: height * 0.05,
+          }}
+        >
+          Pokedex
+        </Animated.Text>
+      </TouchableOpacity>
       {fishin && (
         <FishinBar
           fishin={fishin}
@@ -107,14 +119,5 @@ const MainGame = ({ navigation }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "gray",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
 
 export default MainGame;
