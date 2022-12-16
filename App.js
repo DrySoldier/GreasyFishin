@@ -1,4 +1,5 @@
 import { StatusBar } from "expo-status-bar";
+import { RecoilRoot } from 'recoil';
 import RootStack from "./src/navigation/RootStack";
 
 /**
@@ -34,9 +35,9 @@ import RootStack from "./src/navigation/RootStack";
 
 export default function App() {
   return (
-    <>
+    <RecoilRoot>
       <StatusBar style="auto" />
       <RootStack />
-    </>
+    </RecoilRoot >
   );
 }

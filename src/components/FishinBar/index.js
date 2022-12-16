@@ -1,6 +1,15 @@
 import { useEffect, useState, useRef, useReducer } from "react";
-import { Text, View, Animated, Easing, Pressable, LogBox } from "react-native";
-import { FISH_DIFFICULTY } from "../../constants";
+import {
+  Text,
+  View,
+  Animated,
+  Easing,
+  Pressable,
+  LogBox,
+  ImageBackground,
+  Image,
+} from "react-native";
+import { FISH_DIFFICULTY, winHeight, winWidth } from "../../constants";
 import { randInt, useComponentSize } from "../../utils/index";
 import styles from "./styles";
 
@@ -19,6 +28,7 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
   const [lureCast, setLureCast] = useState(false);
   const [chances, setChances] = useState(0);
   const [fishLost, setFishLost] = useState(false);
+  const [fishCaught, setFishCaught] = useState(false);
 
   const [fishinBarSize, onFishinBarLayout] = useComponentSize();
   const [catchZoneSize, onCatchZoneLayout] = useComponentSize();
@@ -27,6 +37,9 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
   const lureX = useRef(new Animated.Value(0)).current;
   const lureY = useRef(new Animated.Value(0)).current;
   const catchFlashOpac = useRef(new Animated.Value(0)).current;
+
+  const resultsScale = useRef(new Animated.Value(0)).current;
+  const fishinBarScale = useRef(new Animated.Value(1)).current;
 
   const lureRotate = useRef(new Animated.Value(0)).current;
   const lureRotateInterpolation = lureRotate.interpolate({
@@ -96,7 +109,11 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
 
   // Generate new catchzone
   useEffect(() => {
-    if (!!difficulty && !!fishinBarSize && (catchZonesLeft || catchZonesLeft === 0)) {
+    if (
+      !!difficulty &&
+      !!fishinBarSize &&
+      (catchZonesLeft || catchZonesLeft === 0)
+    ) {
       const czX = randInt(0, fishinBarSize.width - difficulty.width);
 
       setCatchZone({ x: czX, width: difficulty.width });
@@ -113,6 +130,7 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
 
   const lostFish = () => {
     setFishLost(true);
+    setChances("Fish lost :(");
 
     // Fishin bar broke animation
     Animated.parallel([
@@ -136,12 +154,17 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
         easing: Easing.linear,
         useNativeDriver: true,
       }),
+      Animated.timing(resultsScale, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
     ]).start();
   };
 
   // This logic is effect-based to get updated state, rather than stale state from callbacks
   useEffect(() => {
-    if (lureCast) {
+    if (lureCast && !fishCaught && !fishLost) {
       if (chances < 2) {
         lostFish();
       } else {
@@ -177,6 +200,7 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
   const attemptCatch = () => {
     // Reset fishin bar on press
     if (fishLost) return lostFishCB();
+    if (fishCaught) return caughtFishCB();
 
     // Otherwise, attempt to catch fish
     const lureXValue = lureX.__getValue();
@@ -207,7 +231,22 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
       setChances(difficulty.chances);
 
       if (catchZonesLeft === 0) {
-        caughtFishCB();
+        setFishCaught(true);
+        setChances("Fish caught!")
+        lureX.stopAnimation();
+        lureX.removeAllListeners();
+        Animated.parallel([
+          Animated.timing(resultsScale, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(fishinBarScale, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ]).start();
       } else {
         setCatchZonesLeft((prevState) => prevState - 1);
       }
@@ -225,12 +264,71 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
         ]}
         onPressIn={attemptCatch}
       />
-      <Text style={{ fontSize: 24, color: "blue" }}>{chances}</Text>
+      <View
+        style={{
+          height: winHeight / 2,
+          width: winWidth / 2,
+          top: 25,
+          position: "absolute",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ImageBackground
+          style={{
+            height: "100%",
+            width: "100%",
+            position: "absolute",
+            justifyContent: "flex-start",
+            alignItems: "center",
+          }}
+          resizeMode="stretch"
+          source={require("../../../assets/combat_banner.png")}
+        >
+          <Text style={{ fontSize: 28, color: "gold", marginTop: 17 }}>
+            {chances}
+          </Text>
+        </ImageBackground>
+        <Animated.View
+          style={{
+            height: "100%",
+            width: "100%",
+            left: 50,
+            transform: [{ scale: resultsScale }],
+          }}
+        >
+          <ImageBackground
+            style={{
+              height: "80%",
+              width: "80%",
+              position: "absolute",
+              top: 75,
+            }}
+            resizeMode="stretch"
+            source={require("../../../assets/fade.png")}
+          >
+            {fishLost ? (
+              <Image
+                style={{ height: "90%", width: "125%", left: -50 }}
+                resizeMode="stretch"
+                source={require("../../../assets/snap.png")}
+              />
+            ) : (
+              <Text>insert fish here</Text>
+            )}
+          </ImageBackground>
+        </Animated.View>
+      </View>
       <Animated.View
         onLayout={onFishinBarLayout}
         style={[
           styles.fishinBarContainer,
-          { transform: [{ rotateZ: fishinBarRotateInterpolation }] },
+          {
+            transform: [
+              { rotateZ: fishinBarRotateInterpolation },
+              { scale: fishinBarScale },
+            ],
+          },
         ]}
       >
         <View
