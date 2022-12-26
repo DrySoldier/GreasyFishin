@@ -14,6 +14,8 @@ const styles = StyleSheet.create({
     backgroundColor: "cyan",
     position: "absolute",
     bottom: 50,
+    borderRadius: 15,
+    overflow: "hidden",
   },
   catchZone: {
     position: "absolute",
@@ -22,8 +24,7 @@ const styles = StyleSheet.create({
   },
   lure: {
     position: "absolute",
-    height: "100%",
-    backgroundColor: "red",
+    height: "100%"
   },
 });
 

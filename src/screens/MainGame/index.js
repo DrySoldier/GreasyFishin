@@ -1,21 +1,17 @@
 import { useEffect, useState, useRef } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
-  Text,
-} from "react-native";
+import { View, Animated, Dimensions, Text } from "react-native";
+import { useRecoilState } from "recoil";
 import Background from "../../components/Background";
 import FishinBar from "../../components/FishinBar";
 import ImageButton from "../../components/ImageButton";
 import { NavigableRoutes } from "../../navigation";
-import { randInt } from "../../utils";
+import { fishingEquipment } from "../../recoil";
 import styles from "./styles";
 
-const { width, height } = Dimensions.get("screen");
+const { height } = Dimensions.get("screen");
 
 const MainGame = ({ navigation }) => {
+  const [fishingEq, setFishingEq] = useRecoilState(fishingEquipment);
   // Set this to true to skip intro
   const [gameStarted, setGameStarted] = useState(false);
   const [lureCast, setLureCast] = useState(false);
@@ -24,10 +20,17 @@ const MainGame = ({ navigation }) => {
 
   const castOpac = useRef(new Animated.Value(0)).current;
 
-  const caughtFishCB = (fish) => {
+  const caughtFishCB = (fish, chances) => {
     setFishin(false);
     setLureCast(false);
     // Add fish to inventory, fish-dex (If they have journal)
+    setFishingEq({
+      ...fishingEq,
+      caughtFish: !fishingEq?.caughtFish?.includes(fish.id)
+        ? [...fishingEq.caughtFish, fish.id]
+        : fishingEq?.caughtFish,
+      currentFish: { id: fish.id, cost: fish.cost * chances }
+    });
   };
 
   const lostFishCB = () => {

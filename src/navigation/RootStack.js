@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 
@@ -6,10 +6,15 @@ import { NavigableRoutes } from "./index.js";
 import MainGame from "../screens/MainGame/index.js";
 import StatsDrawer from "../screens/StatsDrawer/index.js";
 import StoreDrawer from "../screens/StoreDrawer/index.js";
+import { useSave } from "../utils/asyncData.js";
 
 const Stack = createStackNavigator();
 
 const RootStack = () => {
+  const loadSave = useSave();
+  useEffect(() => {
+    loadSave();
+  }, []);
   return (
     <NavigationContainer>
       <Stack.Navigator
