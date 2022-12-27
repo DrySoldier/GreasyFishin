@@ -188,7 +188,7 @@ const StoreDrawer = ({ navigation }) => {
                 setFishingEq({
                   ...fishingEq,
                   currentFish: { id: undefined, cost: 0 },
-                  money: fishingEq?.currentFish?.cost + fishingEq.money,
+                  money: (fishingEq?.currentFish?.cost + fishingEq.money) || 0,
                 });
               }}
               disabled={!!fishingEq?.d}
