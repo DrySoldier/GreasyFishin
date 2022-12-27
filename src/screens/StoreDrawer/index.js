@@ -23,9 +23,8 @@ const StoreDrawer = ({ navigation }) => {
   const [selectedRod, setSelectedRod] = useState();
   const [fishingEq, setFishingEq] = useRecoilState(fishingEquipment);
   const { height: winHeight, width: winWidth } = useWindowDimensions();
-  const [currentFish, setCurrentFish] = useState(
-    FISH.find((e) => e.id === fishingEq.currentFish.id)
-  );
+  const currentFish = useRef(FISH.find((e) => e.id === fishingEq.currentFish.id)).current;
+  
   const storeStartingPos = -winWidth * 0.3;
   const storeX = useRef(new Animated.Value(storeStartingPos)).current;
 

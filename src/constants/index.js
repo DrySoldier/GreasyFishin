@@ -24,14 +24,14 @@ import MechanicsRod from "../../assets/MechanicsRod.png";
 import RealRod from "../../assets/RealRodFinal.png";
 
 export const FISH = [
-  { id: 1, name: "Lexi the Cat-fish", image: LexiFish, cost: 12, description: "Fun fact: She's actually fucking the most curious cat and always fucking uhhhhh.... always wanting to fucking... how do I put this into words? Has a lot of ADHD and can't focus on one thing, I give her one toy and she loves it but then I'll play with the other cats and she'll come over and be all up in the business" },
-  { id: 2, name: "Louie the Cat-fish", image: LouieFish, cost: 12, description: "The leader of this school of cat-fish, but don't let the others know. There will be competition, and shins will be bumped against." },
-  { id: 3, name: "Luna the Cat-fish", image: LunaFish, cost: 12, description: "Named after a character from Harry Potter. Wingardium Leviosa! Accio pussy!" },
+  { id: 1, name: "Lexi the Cat-fish", image: LexiFish, cost: 36, description: "Fun fact: She's actually fucking the most curious cat and always fucking uhhhhh.... always wanting to fucking... how do I put this into words? Has a lot of ADHD and can't focus on one thing, I give her one toy and she loves it but then I'll play with the other cats and she'll come over and be all up in the business" },
+  { id: 2, name: "Louie the Cat-fish", image: LouieFish, cost: 36, description: "The leader of this school of cat-fish, but don't let the others know. There will be competition, and shins will be bumped against." },
+  { id: 3, name: "Luna the Cat-fish", image: LunaFish, cost: 36, description: "Named after a character from Harry Potter. Wingardium Leviosa! Accio pussy!" },
   { id: 4, name: "Islamic Terrorist Fish", image: IslamicTerroristFish, cost: 8, description: "Sawed-off and XM are the only shotguns this fish has known" },
   { id: 5, name: "Palestinian Terrorist Fish", image: PalestineTerroristFish, cost: 8, description: "Chad vent-diver vs virgin ramp rusher" },
-  { id: 6, name: "Racist Fish", image: RacistFish, cost: 2, description: "He's just a sucker for NASCAR!" },
-  { id: 7, name: "Ghost Fish", image: GhostFish, cost: 2, description: "This isn't even a real ghost-fish, it's just a regular bass that really likes to trick or treat!" },
-  { id: 8, name: "Minecraft Fish", image: MinecraftFish, cost: 2, description: "Legend has it of a faraway kingdom, a grand half-built castle, a quaint little village, and a nice river-side house..." },
+  { id: 6, name: "Racist Fish", image: RacistFish, cost: 8, description: "He's just a sucker for NASCAR!" },
+  { id: 7, name: "Ghost Fish", image: GhostFish, cost: 4, description: "This isn't even a real ghost-fish, it's just a regular bass that really likes to trick or treat!" },
+  { id: 8, name: "Minecraft Fish", image: MinecraftFish, cost: 4, description: "Legend has it of a faraway kingdom, a grand half-built castle, a quaint little village, and a nice river-side house..." },
 ];
 
 export const FISH_DIFFICULTY = {

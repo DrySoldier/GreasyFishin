@@ -8,7 +8,7 @@ import {
   LogBox,
   ImageBackground,
   Image,
-  useWindowDimensions
+  useWindowDimensions,
 } from "react-native";
 import { useRecoilValue } from "recoil";
 import { FISH, FISHING_RODS, FISH_DIFFICULTY } from "../../constants";
@@ -38,7 +38,10 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
   const [fishLost, setFishLost] = useState(false);
   const [fishCaught, setFishCaught] = useState(false);
   const [fishToCatch, setFishToCatch] = useState(undefined);
-  const currentRod = FISHING_RODS.find(e => e.id === fishingEq.rod) || { modifier: 0 };
+  const currentRod = FISHING_RODS.find((e) => e.id === fishingEq.rod) || {
+    modifier: 0,
+  };
+  const chancesWhenFishCaught = useRef(undefined);
 
   const [fishinBarSize, onFishinBarLayout] = useComponentSize();
   const [catchZoneSize, onCatchZoneLayout] = useComponentSize();
@@ -258,7 +261,7 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
   const attemptCatch = () => {
     // Reset fishin bar on press
     if (fishLost) return lostFishCB();
-    if (fishCaught) return caughtFishCB(fishToCatch, chances);
+    if (fishCaught) return caughtFishCB(fishToCatch, chancesWhenFishCaught.current);
 
     // Otherwise, attempt to catch fish
     const lureXValue = lureX.__getValue();
@@ -285,6 +288,7 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
       lureXValue >= catchZone.x &&
       lureXValue + lureSize.width <= catchZone.x + catchZone.width
     ) {
+      chancesWhenFishCaught.current = chances;
       // Reset chances for each successful hit
       setChances(difficulty.chances);
 
@@ -355,7 +359,11 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
             },
           ]}
         >
-          <Image resizeMode="stretch" source={require('../../../assets/lure.png')} style={{ height: '100%', width: '100%' }} />
+          <Image
+            resizeMode="stretch"
+            source={require("../../../assets/lure.png")}
+            style={{ height: "100%", width: "100%" }}
+          />
         </Animated.View>
       </Animated.View>
       <View
@@ -413,7 +421,7 @@ const FishinBar = ({ caughtFishCB, lostFishCB }) => {
             ) : (
               fishCaught && (
                 <Image
-                  style={{ height: 300, width: 300, left: -winWidth * .1 }}
+                  style={{ height: 300, width: 300, left: -winWidth * 0.1 }}
                   source={fishToCatch?.image}
                 />
               )

@@ -14,7 +14,7 @@ import {
 import { useRecoilValue } from "recoil";
 import ImageButton from "../../components/ImageButton";
 
-import { FISH, winHeight } from "../../constants";
+import { FISH } from "../../constants";
 import { fishingEquipment } from "../../recoil";
 
 const StatsDrawer = ({ navigation }) => {
